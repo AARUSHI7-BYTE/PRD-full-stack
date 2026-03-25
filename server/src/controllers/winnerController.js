@@ -1,39 +1,38 @@
+import  supabase  from "../config/supabaseClient.js";
 
-import { supabase } from "../config/supabaseClient.js";
+// 📊 Get all winners (admin)
+export const getAllWinners = async (req, res) => {
+  const { data, error } = await supabase
+    .from("draw_results")
+    .select("*");
 
-export const calculateWinners = async (req, res) => {
-  try {
-    const { draw_id } = req.body;
+  if (error) return res.status(400).send(error.message);
 
-    const { data: draw } = await supabase
-      .from("draws")
-      .select("*")
-      .eq("id", draw_id)
-      .single();
+  res.json(data);
+};
 
-    if (!draw) return res.status(404).json({ error: "Draw not found" });
+// 👤 Get current user's winnings
+export const getMyResults = async (req, res) => {
+  const { data, error } = await supabase
+    .from("draw_results")
+    .select("*")
+    .eq("user_id", req.userId);
 
-    const { data: scores } = await supabase.from("scores").select("*");
+  if (error) return res.status(400).send(error.message);
 
-    let winners = [];
+  res.json(data);
+};
 
-    scores.forEach((s) => {
-      if (draw.numbers.includes(s.score)) {
-        winners.push({
-          user_id: s.user_id,
-          draw_id,
-          match_count: 1,
-          amount: 1000,
-        });
-      }
-    });
+// 💰 Update winner status (admin action)
+export const updateWinnerStatus = async (req, res) => {
+  const { id, status } = req.body;
 
-    if (winners.length > 0) {
-      await supabase.from("winners").insert(winners);
-    }
+  const { data, error } = await supabase
+    .from("draw_results")
+    .update({ status })
+    .eq("id", id);
 
-    res.json({ message: "Winners calculated" });
-  } catch {
-    res.status(500).json({ error: "Server error" });
-  }
+  if (error) return res.status(400).send(error.message);
+
+  res.send("Status updated");
 };

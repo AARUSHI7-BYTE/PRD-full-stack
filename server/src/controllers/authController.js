@@ -1,62 +1,42 @@
-import { supabase } from "../config/supabaseClient.js";
+import  supabase  from "../config/supabaseClient.js";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
 export const signup = async (req, res) => {
-  try {
-    let { email, password } = req.body;
+  const { name, email, password } = req.body;
 
-    if (!email || !password) {
-      return res.status(400).json({ error: "Email and password required" });
-    }
+  const hashed = await bcrypt.hash(password, 10);
 
-    email = email.trim().toLowerCase();
-    password = password.trim();
+  const { data, error } = await supabase.from("users").insert([
+    { name, email, password: hashed }
+  ]);
 
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password
-    });
+  if (error) return res.status(400).send(error.message);
 
-    if (error) {
-      return res.status(400).json({ error: error.message });
-    }
-
-    res.json({
-      message: "Signup successful",
-      user: data.user
-    });
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({ error: "Server error" });
-  }
+  res.send("User created");
 };
 
-
 export const login = async (req, res) => {
-  try {
-    let { email, password } = req.body;
+  const { email, password } = req.body;
 
-    if (!email || !password) {
-      return res.status(400).json({ error: "Email and password required" });
-    }
+  const { data } = await supabase
+    .from("users")
+    .select("*")
+    .eq("email", email)
+    .single();
 
-    email = email.trim().toLowerCase();
-    password = password.trim();
+  const match = await bcrypt.compare(password, data.password);
 
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password
-    });
+  if (!match) return res.status(400).send("Wrong password");
 
-    if (error) {
-      return res.status(400).json({ error: error.message });
-    }
+  const token = jwt.sign({ id: data.id }, "secret");
 
-    res.json({
-      session: data.session,
-      user: data.user
-    });
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({ error: "Server error" });
+  res.json({ 
+    token,
+  user:{
+    id:data.id,
+    email:data.email,
+    is_admin:data.is_admin
   }
+ });
 };

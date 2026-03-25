@@ -1,75 +1,60 @@
 import { useState } from "react";
-import { signup } from "../services/authService";
 import { useNavigate } from "react-router-dom";
+import API from "../services/api";
 
 export default function Signup() {
   const navigate = useNavigate();
 
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const handleSignup = async () => {
     try {
-      const cleanData = {
-        email: email.trim().toLowerCase(),
-        password: password.trim()
-      };
-
-      await signup(cleanData);
+      await API.post("/signup", {
+        name,
+        email,
+        password
+      });
 
       alert("Signup successful");
-      navigate("/");
+      navigate("/"); // go to login
     } catch (err) {
-      console.log(err.response?.data);
-      alert(err.response?.data?.error || "Signup failed");
+      alert("Signup failed");
+      console.error(err);
     }
   };
 
   return (
-    <div className="flex h-screen items-center justify-center bg-gradient-to-br from-[#0f172a] via-black to-[#020617] text-white">
+    <div className="flex h-screen justify-center items-center">
+      <div className="bg-white p-6 rounded-xl shadow w-80">
+        <h2 className="text-xl font-bold mb-4">Signup</h2>
 
-      <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-2xl w-80 shadow-xl">
-
-        {/* Title */}
-        <h2 className="text-2xl font-semibold mb-6 text-center">
-          Create Account
-        </h2>
-
-        {/* Email */}
         <input
-          type="email"
+          className="border p-2 w-full mb-2"
+          placeholder="Name"
+          onChange={(e) => setName(e.target.value)}
+        />
+
+        <input
+          className="border p-2 w-full mb-2"
           placeholder="Email"
-          className="w-full p-3 mb-4 bg-white/10 rounded-xl outline-none focus:ring-2 focus:ring-purple-500 transition"
           onChange={(e) => setEmail(e.target.value)}
         />
 
-        {/* Password */}
         <input
           type="password"
+          className="border p-2 w-full mb-2"
           placeholder="Password"
-          className="w-full p-3 mb-6 bg-white/10 rounded-xl outline-none focus:ring-2 focus:ring-purple-500 transition"
           onChange={(e) => setPassword(e.target.value)}
         />
 
-        {/* Button */}
         <button
           onClick={handleSignup}
-          className="w-full bg-gradient-to-r from-purple-600 to-cyan-500 py-3 rounded-xl font-semibold hover:scale-[1.03] transition"
+          className="bg-blue-500 text-white w-full py-2 rounded"
         >
-          Sign Up
+          Signup
         </button>
-
-        {/* Login redirect */}
-        <p className="text-sm text-gray-400 mt-6 text-center">
-          Already have an account?{" "}
-          <span
-            className="text-purple-400 cursor-pointer hover:underline"
-            onClick={() => navigate("/")}
-          >
-            Login
-          </span>
-        </p>
-
       </div>
     </div>
   );

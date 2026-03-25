@@ -1,71 +1,60 @@
-import { useState } from "react";
-import { login } from "../services/authService";
+import { useContext, useState } from "react";
+import { AuthContext } from "../context/AuthContext";
+import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 
 export default function Login() {
-  const navigate = useNavigate();
-
+  const navigate = useNavigate()
+  const { login } = useContext(AuthContext);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleLogin = async () => {
-    try {
-      await login({
-        email: email.trim().toLowerCase(),
-        password: password.trim()
-      });
+ const handleLogin = async () => {
+  try {
+    const res = await login(email, password);
 
-      alert("Login successful");
-      navigate("/dashboard");
-    } catch (err) {
-      console.log(err.response?.data);
-      alert(err.response?.data?.error || "Login failed");
+    console.log("Login success:", res);
+    const user = JSON.parse(localStorage.getItem("user"));
+    if(user?.is_admin){
+      navigate("/admin")
+    } else{
+    navigate("/dashboard");
     }
-  };
+  } catch (err) {
+    console.log("Login failed:", err.response?.data || err.message);
+    alert("Invalid email or password");
+  }
+};
 
   return (
-    <div className="flex h-screen items-center justify-center bg-gradient-to-br from-[#0f172a] via-black to-[#020617] text-white">
+    <div className="flex h-screen justify-center items-center">
+      <div className="bg-white p-6 rounded-xl shadow w-80">
+        <h2 className="text-xl font-bold mb-4">Login</h2>
 
-      <div className="bg-white/5 backdrop-blur-xl border border-white/10 p-8 rounded-2xl w-80 shadow-xl">
-
-        {/* Title */}
-        <h2 className="text-2xl font-semibold mb-6 text-center">
-          Welcome Back
-        </h2>
-
-        {/* Email */}
         <input
-          type="email"
+          className="border p-2 w-full mb-2"
           placeholder="Email"
-          className="w-full p-3 mb-4 bg-white/10 rounded-xl outline-none focus:ring-2 focus:ring-purple-500 transition"
           onChange={(e) => setEmail(e.target.value)}
         />
 
-        {/* Password */}
         <input
           type="password"
+          className="border p-2 w-full mb-2"
           placeholder="Password"
-          className="w-full p-3 mb-6 bg-white/10 rounded-xl outline-none focus:ring-2 focus:ring-purple-500 transition"
           onChange={(e) => setPassword(e.target.value)}
         />
 
-        {/* Button */}
         <button
           onClick={handleLogin}
-          className="w-full bg-gradient-to-r from-purple-600 to-cyan-500 py-3 rounded-xl font-semibold hover:scale-[1.03] transition"
+          className="bg-blue-500 text-white w-full py-2 rounded"
         >
           Login
         </button>
-
-        {/* Signup line */}
-        <p className="text-sm text-gray-400 mt-6 text-center">
-          Don’t have an account?{" "}
-          <span
-            className="text-purple-400 cursor-pointer hover:underline"
-            onClick={() => navigate("/signup")}
-          >
-            Sign Up
-          </span>
+        <p className="mt-4 text-sm text-center">
+          Don't have an account?{" "}
+          <Link to="/signup" className="text-blue-500">
+            Signup
+          </Link>
         </p>
 
       </div>

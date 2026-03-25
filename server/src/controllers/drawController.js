@@ -1,35 +1,45 @@
+import  supabase  from "../config/supabaseClient.js";
+import { generateDrawNumbers, countMatches } from "../utils/drawLogic.js";
 
-import { supabase } from "../config/supabaseClient.js";
-import { generateDrawNumbers } from "../utils/drawGenerator.js";
+export const runDraw = async (req, res) => {
+  const numbers = generateDrawNumbers();
 
-export const createDraw = async (req, res) => {
-  try {
-    const numbers = generateDrawNumbers();
+  const { data: draw } = await supabase
+    .from("draws")
+    .insert([{ numbers, month: "March" }])
+    .select()
+    .single();
 
-    const { data, error } = await supabase
-      .from("draws")
-      .insert([{ numbers, status: "published", prize_pool: 10000 }])
-      .select();
+  const { data: users } = await supabase.from("users").select("*");
 
-    if (error) return res.status(400).json({ error: error.message });
-
-    res.json(data);
-  } catch {
-    res.status(500).json({ error: "Server error" });
-  }
-};
-
-export const getDraws = async (req, res) => {
-  try {
-    const { data, error } = await supabase
-      .from("draws")
+  for (let user of users) {
+    const { data: scores } = await supabase
+      .from("scores")
       .select("*")
-      .order("created_at", { ascending: false });
+      .eq("user_id", user.id)
+      .order("date", { ascending: false })
+      .limit(5);
 
-    if (error) return res.status(400).json({ error: error.message });
+    if (!scores || scores.length < 5) continue;
 
-    res.json(data);
-  } catch {
-    res.status(500).json({ error: "Server error" });
+    const matches = countMatches(scores, numbers);
+
+    let prize = 0;
+    if (matches === 5) prize = 10000;
+    else if (matches === 4) prize = 5000;
+    else if (matches === 3) prize = 2000;
+
+    if (prize > 0) {
+      await supabase.from("draw_results").insert([
+        {
+          user_id: user.id,
+          draw_id: draw.id,
+          matches,
+          prize
+        }
+      ]);
+    }
   }
+
+  res.json({ numbers });
 };

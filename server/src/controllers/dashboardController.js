@@ -1,38 +1,25 @@
-import { supabase } from "../config/supabaseClient.js";
+import  supabase  from "../config/supabaseClient.js";
 
 export const getDashboard = async (req, res) => {
-  try {
-    const user_id = req.user.id;
+  const userId = req.userId;
 
-    // user scores
-    const { data: scores } = await supabase
-      .from("scores")
-      .select("*")
-      .eq("user_id", user_id)
-      .order("created_at", { ascending: false });
+  const { data: user } = await supabase
+    .from("users")
+    .select("*")
+    .eq("id", userId)
+    .single();
 
-    // latest draw
-    const { data: draw } = await supabase
-      .from("draws")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .single();
+  const { data: scores } = await supabase
+    .from("scores")
+    .select("*")
+    .eq("user_id", userId)
+    .order("date", { ascending: false })
+    .limit(5);
 
-    // winners for this user
-    const { data: winners } = await supabase
-      .from("winners")
-      .select("*")
-      .eq("user_id", user_id);
+  const { data: winnings } = await supabase
+    .from("winnings")
+    .select("*")
+    .eq("user_id", userId);
 
-    res.json({
-      scores: scores || [],
-      latestDraw: draw || null,
-      winners: winners || []
-    });
-
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({ error: "Dashboard failed" });
-  }
+  res.json({ user, scores, winnings });
 };
