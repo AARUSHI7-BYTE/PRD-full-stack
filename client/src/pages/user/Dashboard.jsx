@@ -9,6 +9,7 @@ export default function Dashboard() {
   useEffect(() => {
     const fetchData = async () => {
       const res = await API.get("/dashboard");
+      console.log(res.data);
       setData(res.data);
     };
 
