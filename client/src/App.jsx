@@ -35,9 +35,7 @@ function App() {
           element={
             <ProtectedRoute>
               <DashboardLayout />
-            </ProtectedRoute>
-          }
-        >
+            </ProtectedRoute>}>
           <Route index element={<Dashboard />} />
           <Route path="scores" element={<Scores />} />
           <Route path="charity" element={<Charity />} />

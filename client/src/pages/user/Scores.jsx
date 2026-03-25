@@ -27,7 +27,7 @@ export default function Scores() {
   };
 
   return (
-    <DashboardLayout>
+ 
       <div className="space-y-6">
 
         <h2 className="text-xl font-bold">Scores</h2>
@@ -60,6 +60,6 @@ export default function Scores() {
         </div>
 
       </div>
-    </DashboardLayout>
+   
   );
 }

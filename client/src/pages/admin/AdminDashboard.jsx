@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import API from "../../services/api";
-import AdminLayout from "../../layouts/AdminLayout";
 import Card from "../../components/Card";
 import AdminChart from "../../components/AdminChart";
 
@@ -11,7 +10,7 @@ export default function AdminDashboard() {
     API.get("/admin/stats").then((res) => setStats(res.data));
   }, []);
 
-  if (!stats) return <AdminLayout>Loading...</AdminLayout>;
+  if (!stats) return <div>Loading...</div>;
 
   return (
     

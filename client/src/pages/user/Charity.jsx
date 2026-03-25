@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import API from "../../services/api";
-import DashboardLayout from "../../layouts/DashboardLayout";
 
 export default function Charity() {
   const [charities, setCharities] = useState([]);

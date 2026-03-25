@@ -2,12 +2,11 @@ import { Link, useLocation } from "react-router-dom";
 
 export default function Sidebar() {
   const location = useLocation();
-
   const user = JSON.parse(localStorage.getItem("user"));
 
   const linkClass = (path) =>
     `block px-4 py-2 rounded-lg ${
-      location.pathname === path
+      location.pathname.startsWith(path)
         ? "bg-blue-500 text-white"
         : "hover:bg-gray-200 text-gray-700"
     }`;
@@ -21,28 +20,28 @@ export default function Sidebar() {
 
       <nav className="space-y-2">
 
-        {/* 👤 USER LINKS */}
+        {/* USER */}
         {!user?.is_admin && (
           <>
             <Link to="/dashboard" className={linkClass("/dashboard")}>
               Dashboard
             </Link>
 
-            <Link to="/scores" className={linkClass("/scores")}>
+            <Link to="/dashboard/scores" className={linkClass("/dashboard/scores")}>
               Scores
             </Link>
 
-            <Link to="/charity" className={linkClass("/charity")}>
+            <Link to="/dashboard/charity" className={linkClass("/dashboard/charity")}>
               Charity
             </Link>
 
-            <Link to="/results" className={linkClass("/results")}>
+            <Link to="/dashboard/results" className={linkClass("/dashboard/results")}>
               Results
             </Link>
           </>
         )}
 
-        {/* 👑 ADMIN LINKS */}
+        {/* ADMIN */}
         {user?.is_admin && (
           <>
             <Link to="/admin" className={linkClass("/admin")}>
