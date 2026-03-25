@@ -1,10 +1,9 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "https://prd-full-stack-4.onrender.com",
+  baseURL: import.meta.env.VITE_API_URL,
 });
 
-// Attach token automatically
 API.interceptors.request.use((req) => {
   const token = localStorage.getItem("token");
   if (token) {
